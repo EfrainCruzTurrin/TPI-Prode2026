@@ -27,10 +27,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         Usuario usuario = Usuario.builder()
-                .nombre(request.getNombre())
+                .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .rol(Rol.USER)
+                .rol(Rol.JUGADOR)
+                .puntosTotales(0)
+                .resultadosExactos(0)
                 .build();
 
         usuarioRepository.save(usuario);
@@ -52,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
     private AuthResponseDto buildResponse(Usuario usuario, String token) {
         return AuthResponseDto.builder()
                 .id(usuario.getId())
-                .nombre(usuario.getNombre())
+                .username(usuario.getUsername())
                 .email(usuario.getEmail())
                 .rol(usuario.getRol().name())
                 .token(token)

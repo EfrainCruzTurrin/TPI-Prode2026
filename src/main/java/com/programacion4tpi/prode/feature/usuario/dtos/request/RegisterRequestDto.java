@@ -1,11 +1,14 @@
 package com.programacion4tpi.prode.feature.usuario.dtos.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter @Setter
 public class RegisterRequestDto {
-    private String nombre;
+    private String username;
     private String email;
     private String password;
 }

@@ -24,19 +24,26 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String nombre;
+    @Column(nullable = false, unique = true)
+    private String username;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
+
+    @Column(nullable = false)
+    private int puntosTotales = 0;
+
+    @Column(nullable = false)
+    private int resultadosExactos = 0;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));
     }
 
-    @Override public String getUsername() { return email; }
+    @Override
+    public String getUsername() { return email; }
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }

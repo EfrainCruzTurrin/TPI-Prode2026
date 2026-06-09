@@ -5,7 +5,7 @@ import lombok.*;
 @Getter @Setter @Builder
 public class AuthResponseDto {
     private Long id;
-    private String nombre;
+    private String username;
     private String email;
     private String rol;
     private String token;
