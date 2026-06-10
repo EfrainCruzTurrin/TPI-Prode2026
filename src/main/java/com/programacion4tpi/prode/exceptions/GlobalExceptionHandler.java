@@ -1,5 +1,6 @@
 package com.programacion4tpi.prode.exceptions;
 
+import com.programacion4tpi.prode.exceptions.fechas.FechaDuplicadaException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

@@ -1,6 +1,6 @@
 package com.programacion4tpi.prode.feature.fecha.service.impl;
 
-import com.programacion4tpi.prode.exceptions.FechaDuplicadaException;
+import com.programacion4tpi.prode.exceptions.fechas.FechaDuplicadaException;
 import com.programacion4tpi.prode.feature.fecha.dtos.request.FechaRequestDto;
 import com.programacion4tpi.prode.feature.fecha.dtos.response.FechaResponseDto;
 import com.programacion4tpi.prode.feature.fecha.models.EstadoFecha;
