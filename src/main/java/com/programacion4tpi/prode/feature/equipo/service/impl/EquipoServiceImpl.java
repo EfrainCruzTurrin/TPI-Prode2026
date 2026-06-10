@@ -1,7 +1,7 @@
 package com.programacion4tpi.prode.feature.equipo.service.impl;
 
-import com.programacion4tpi.prode.exceptions.ConflictException;
-import com.programacion4tpi.prode.exceptions.ResourceNotFoundException;
+import com.programacion4tpi.prode.exceptions.global.ConflictException;
+import com.programacion4tpi.prode.exceptions.global.ResourceNotFoundException;
 import com.programacion4tpi.prode.feature.equipo.dtos.request.EquipoRequestDto;
 import com.programacion4tpi.prode.feature.equipo.dtos.response.EquipoResponseDto;
 import com.programacion4tpi.prode.feature.equipo.models.Equipo;
