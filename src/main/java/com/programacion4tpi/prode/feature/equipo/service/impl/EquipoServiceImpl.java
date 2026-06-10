@@ -32,7 +32,6 @@ public class EquipoServiceImpl implements EquipoService {
 
         Equipo nuevoEquipo = Equipo.builder()
                 .nombre(requestDto.getNombre())
-                .pais(requestDto.getPais())       // campo nuevo
                 .escudoUrl(requestDto.getEscudoUrl())
                 .build();
 
@@ -84,7 +83,6 @@ public class EquipoServiceImpl implements EquipoService {
         return EquipoResponseDto.builder()
                 .id(equipo.getId())
                 .nombre(equipo.getNombre())
-                .pais(equipo.getPais())           // campo nuevo
                 .escudoUrl(equipo.getEscudoUrl())
                 .build();
     }
