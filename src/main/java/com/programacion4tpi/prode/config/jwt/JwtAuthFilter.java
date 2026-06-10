@@ -76,9 +76,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     /** Rutas públicas: no validar JWT ni cargar usuario (menos trabajo y sin consultas innecesarias). */
     private boolean shouldNotProcess(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/auth/")
-                || path.startsWith("/insumos/")
-                || path.startsWith("/h2-console");
+        return path.startsWith("/api/auth/");
+
     }
 
     // Don't override valid autentication

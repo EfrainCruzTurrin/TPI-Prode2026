@@ -44,6 +44,7 @@ public class AuthService implements IAuthService {
 
         Usuario user = Usuario.builder()
                 .username(request.username())
+                .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .rol(Rol.JUGADOR)
                 .build();
