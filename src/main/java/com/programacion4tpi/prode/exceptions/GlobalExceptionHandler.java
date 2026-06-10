@@ -1,59 +1,57 @@
 package com.programacion4tpi.prode.exceptions;
 
-import com.programacion4tpi.prode.exceptions.fechas.FechaDuplicadaException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import java.net.URI;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
-@RestControllerAdvice
+
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-    }
-
-    @ExceptionHandler(FechaDuplicadaException.class)
-    public ResponseEntity<String> manejarFechaDuplicada(
-            FechaDuplicadaException ex
-    ) {
-
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ex.getMessage());
-    }
-
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, Object>> handleConflict(ConflictException ex) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ProblemDetail> handleCustomException(CustomException ex, HttpServletRequest req) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+        problem.setType(ex.getType());
+        problem.setInstance(URI.create(req.getRequestURI()));
+        problem.setProperty("errors", ex.getErrors());
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.status(ex.getStatus())
+                        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                        .body(problem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
-        String errors = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return buildResponse(HttpStatus.BAD_REQUEST, errors);
+    public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                        .map(f -> f.getField() + ": " + f.getDefaultMessage())
+                        .toList();
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                        HttpStatus.BAD_REQUEST, "Error de validación");
+        problem.setType(URI.create("/errors/validation"));
+        problem.setInstance(URI.create(req.getRequestURI()));
+        problem.setProperty("errors", errors);
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.badRequest()
+                        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                        .body(problem);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor.");
-    }
-
-    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", Instant.now().toString());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        return ResponseEntity.status(status).body(body);
+    public ResponseEntity<ProblemDetail> handleGeneric(Exception ex, HttpServletRequest req) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado");
+        problem.setType(URI.create("/errors/internal"));
+        problem.setInstance(URI.create(req.getRequestURI()));
+        problem.setProperty("errors", List.of("Contacte al administrador"));
+        problem.setProperty("timestamp", Instant.now().toString());
+        return ResponseEntity.internalServerError()
+                        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                        .body(problem);
     }
 }

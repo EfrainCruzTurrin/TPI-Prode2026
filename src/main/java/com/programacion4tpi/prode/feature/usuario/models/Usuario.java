@@ -1,5 +1,6 @@
 package com.programacion4tpi.prode.feature.usuario.models;
 
+import com.programacion4tpi.prode.feature.usuario.models.enums.Rol;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -37,6 +38,7 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private int resultadosExactos = 0;
 
+    // ver de mover al repository
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));

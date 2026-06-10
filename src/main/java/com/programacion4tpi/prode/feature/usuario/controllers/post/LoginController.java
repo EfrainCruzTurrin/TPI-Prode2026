@@ -2,7 +2,7 @@ package com.programacion4tpi.prode.feature.usuario.controllers.post;
 
 import com.programacion4tpi.prode.feature.usuario.dtos.request.LoginRequestDto;
 import com.programacion4tpi.prode.feature.usuario.dtos.response.AuthResponseDto;
-import com.programacion4tpi.prode.feature.usuario.service.domain.AuthService;
+import com.programacion4tpi.prode.feature.usuario.services.domain.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

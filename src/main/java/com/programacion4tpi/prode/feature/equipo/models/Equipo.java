@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "equipo")  // nombre real de la tabla en BD
+@Table(name = "equipo")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,9 +18,6 @@ public class Equipo {
 
     @Column(name = "nombre", nullable = false, unique = true, length = 50)
     private String nombre;
-
-    @Column(name = "pais", length = 50)
-    private String pais;  // campo nuevo
 
     @Column(name = "escudo_url", length = 150)
     private String escudoUrl;

@@ -11,6 +11,5 @@ public class EquipoResponseDto {
 
     private Long id;
     private String nombre;
-    private String pais;  // campo nuevo
     private String escudoUrl;
 }
