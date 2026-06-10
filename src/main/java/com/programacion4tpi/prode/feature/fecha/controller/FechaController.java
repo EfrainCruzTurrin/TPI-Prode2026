@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/fechas")
+@RequestMapping("/api/fechas")
 public class FechaController {
 
     private final FechaService fechaService;
