@@ -6,7 +6,7 @@ import com.programacion4tpi.prode.feature.usuario.dtos.request.RefreshRequestDto
 import com.programacion4tpi.prode.feature.usuario.dtos.request.RegisterRequestDto;
 import com.programacion4tpi.prode.feature.usuario.dtos.response.AuthResponseDto;
 import com.programacion4tpi.prode.feature.usuario.dtos.response.RefreshResponseDto;
-import com.programacion4tpi.prode.feature.usuario.services.domain.interfaces.IAuthService;
+import com.programacion4tpi.prode.feature.usuario.services.impl.interfaces.IAuthService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -3,6 +3,7 @@ package com.programacion4tpi.prode.config.jwt;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,65 +24,61 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // Ignora si la request es a paths públicos
         if (shouldNotProcess(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Para no pisar autenticación existente
         if (alreadyHasUserAuthentication()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Obtiene header de autenticación
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        // Si no hay token, no hace nada
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Extrae token del header
         String token = authHeader.substring(BEARER_PREFIX.length()).trim();
         if (token.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Validación de token (firma, expiration, claims)
         jwtService.parseValidClaims(token).ifPresent(claims -> {
-            String username = claims.getSubject();	// saca user
+
+            String username = claims.getSubject();
             if (username == null || username.isBlank()) {
                 return;
             }
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);	// validación contra DB: prioriza seguridad sobre perfonmance (más queries)
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());	// crea un usuario autenticado con permisos custom
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);	// !! define contexto global (autenticado o no)
             } catch (UsernameNotFoundException ignored) {
-                // Token válido pero usuario ya no existe: no rellenar el contexto.
             }
         });
 
-        filterChain.doFilter(request, response);	// continua el flujo de la request.
+        filterChain.doFilter(request, response);
     }
 
-    /** Rutas públicas: no validar JWT ni cargar usuario (menos trabajo y sin consultas innecesarias). */
     private boolean shouldNotProcess(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
 
+        String path = request.getServletPath();
+        System.out.println("PATH => " + path);
+        return path.startsWith("/api/auth/login") || path.startsWith("/api/auth/register") || path.startsWith("/api/auth/refresh");
     }
 
-    // Don't override valid autentication
     private boolean alreadyHasUserAuthentication() {
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null && auth.getPrincipal() instanceof UserDetails;
     }

@@ -10,7 +10,7 @@ import com.programacion4tpi.prode.feature.usuario.dtos.response.RefreshResponseD
 import com.programacion4tpi.prode.feature.usuario.models.*;
 import com.programacion4tpi.prode.feature.usuario.models.enums.Rol;
 import com.programacion4tpi.prode.feature.usuario.repository.UsuarioRepository;
-import com.programacion4tpi.prode.feature.usuario.services.domain.interfaces.IAuthService;
+import com.programacion4tpi.prode.feature.usuario.services.impl.interfaces.IAuthService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class AuthService implements IAuthService {
     @Override
     public void register(RegisterRequestDto request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new UserAlreadyExistsException("El usuario existe");
+            throw new UserAlreadyExistsException("El usuario ya existe");
         }
 
         Usuario user = Usuario.builder()
@@ -51,48 +52,43 @@ public class AuthService implements IAuthService {
         userRepository.save(user);
     }
 
-
     @Override
     public AuthResponseDto login(LoginRequestDto request) {
+
         try {
-            // Encapsular la autenticación en un try-catch para manejar el caso de credenciales inválidas
-            // Si las credenciales son inválidas, se lanza una excepción de tipo InvalidCredentialsException
             Authentication authentication = authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken.unauthenticated(request.username(), request.password())
+                    UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
             );
 
-            // Obtener el usuario autenticado
             UserDetails principal = (UserDetails) authentication.getPrincipal();
 
-            // Obtener los roles del usuario
             assert principal != null;
             var roles = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-            // Generar el token JWT
             String accessToken = jwtService.generateToken(principal.getUsername(), roles);
             String refreshToken = jwtService.generateRefreshToken(principal.getUsername());
 
-            // Devolver el token JWT
             return new AuthResponseDto(accessToken, refreshToken, TOKEN_TYPE_BEARER, jwtProperties.expirationMs());
 
-            // Si las credenciales son inválidas, se lanza una excepción de tipo InvalidCredentialsException
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Credenciales invalidas");
         }
     }
 
     public RefreshResponseDto refresh(RefreshRequestDto request) {
-        Claims claims = jwtService.parseValidClaims(request.refreshToken())	// obtiene token del cliente y lo parsea para ver validez
-                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));	// void en caso de error (401)
+        Claims claims = jwtService.parseValidClaims(request.refreshToken())
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
 
         String username = claims.getSubject();
 
-        Usuario user = userRepository.findByUsername(username)	// validación contra DB (usuario eliminado)
+        System.out.println("SUBJECT = " + username);
+
+        Usuario user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
 
-        var roles = List.of(user.getRol().name());	// rol
+        var roles = List.of(user.getRol().name());
 
-        String newAccessToken = jwtService.generateToken(username, roles);	// nuevo token
+        String newAccessToken = jwtService.generateToken(username, roles);
 
         return new RefreshResponseDto(
                 newAccessToken,

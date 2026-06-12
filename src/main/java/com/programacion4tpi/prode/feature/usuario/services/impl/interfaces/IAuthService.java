@@ -1,4 +1,4 @@
-package com.programacion4tpi.prode.feature.usuario.services.domain.interfaces;
+package com.programacion4tpi.prode.feature.usuario.services.impl.interfaces;
 
 import com.programacion4tpi.prode.feature.usuario.dtos.request.LoginRequestDto;
 import com.programacion4tpi.prode.feature.usuario.dtos.request.RefreshRequestDto;
