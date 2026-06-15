@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PartidoServiceImpl implements PartidoService {
@@ -105,5 +107,12 @@ public class PartidoServiceImpl implements PartidoService {
             throw new BadRequestException(
                     "El equipo local y el equipo visitante no pueden ser el mismo.");
         }
+    }
+
+    @Override
+    public List<PartidoResponseDto> listar() {
+        return partidoRepository.findAll().stream()
+                .map(partidoMapper::toResponseDto)
+                .toList();
     }
 }
