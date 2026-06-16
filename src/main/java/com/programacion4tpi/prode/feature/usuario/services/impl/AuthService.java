@@ -68,7 +68,14 @@ public class AuthService implements IAuthService {
             String accessToken = jwtService.generateToken(principal.getUsername(), roles);
             String refreshToken = jwtService.generateRefreshToken(principal.getUsername());
 
-            return new AuthResponseDto(accessToken, refreshToken, TOKEN_TYPE_BEARER, jwtProperties.expirationMs());
+            return new AuthResponseDto(
+                    accessToken,
+                    refreshToken,
+                    TOKEN_TYPE_BEARER,
+                    jwtProperties.expirationMs(),
+                    principal.getUsername(),
+                    roles.isEmpty() ? null : roles.getFirst()
+            );
 
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException("Credenciales invalidas");
