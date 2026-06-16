@@ -1,7 +1,11 @@
 package com.programacion4tpi.prode.feature.partido.service.impl;
 
+import com.programacion4tpi.prode.exceptions.global.BadRequestException;
+import com.programacion4tpi.prode.exceptions.global.ResourceNotFoundException;
 import com.programacion4tpi.prode.feature.equipo.models.Equipo;
 import com.programacion4tpi.prode.feature.equipo.repository.EquipoRepository;
+import com.programacion4tpi.prode.feature.fecha.models.Fecha;
+import com.programacion4tpi.prode.feature.fecha.repository.FechaRepository;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoUpdateRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.response.PartidoResponseDto;
@@ -11,6 +15,8 @@ import com.programacion4tpi.prode.feature.partido.repository.PartidoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,18 +30,19 @@ public class PartidoServiceImpl implements PartidoService {
     @Override
     @Transactional
     public PartidoResponseDto create(PartidoRequestDto dto) {
-        if (dto.getEquipoLocalId().equals(dto.getEquipoVisitanteId())) {
-            throw new IllegalArgumentException("El equipo local y el equipo visitante no pueden ser el mismo.");
-        }
+        validarEquiposDistintos(dto.getEquipoLocalId(), dto.getEquipoVisitanteId());
 
         Fecha fecha = fechaRepository.findById(dto.getFechaId())
-                .orElseThrow(() -> new RuntimeException("Fecha no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Fecha no encontrada con id: " + dto.getFechaId()));
 
         Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
-                .orElseThrow(() -> new RuntimeException("Equipo local no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Equipo local no encontrado con id: " + dto.getEquipoLocalId()));
 
         Equipo visitante = equipoRepository.findById(dto.getEquipoVisitanteId())
-                .orElseThrow(() -> new RuntimeException("Equipo visitante no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Equipo visitante no encontrado con id: " + dto.getEquipoVisitanteId()));
 
         Partido partido = partidoMapper.toEntity(dto, fecha, local, visitante);
         return partidoMapper.toResponseDto(partidoRepository.save(partido));
@@ -45,7 +52,36 @@ public class PartidoServiceImpl implements PartidoService {
     @Transactional
     public PartidoResponseDto update(Long id, PartidoUpdateRequestDto dto) {
         Partido existing = partidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Partido no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado con id: " + id));
+
+        if (dto.getFechaId() != null) {
+            Fecha fecha = fechaRepository.findById(dto.getFechaId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Fecha no encontrada con id: " + dto.getFechaId()));
+            existing.setFecha(fecha);
+        }
+
+        // Determinamos cuáles serían los IDs finales (nuevos o los actuales) para validar
+        Long localIdFinal = dto.getEquipoLocalId() != null
+                ? dto.getEquipoLocalId() : existing.getEquipoLocal().getId();
+        Long visitanteIdFinal = dto.getEquipoVisitanteId() != null
+                ? dto.getEquipoVisitanteId() : existing.getEquipoVisitante().getId();
+
+        validarEquiposDistintos(localIdFinal, visitanteIdFinal);
+
+        if (dto.getEquipoLocalId() != null) {
+            Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Equipo local no encontrado con id: " + dto.getEquipoLocalId()));
+            existing.setEquipoLocal(local);
+        }
+
+        if (dto.getEquipoVisitanteId() != null) {
+            Equipo visitante = equipoRepository.findById(dto.getEquipoVisitanteId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Equipo visitante no encontrado con id: " + dto.getEquipoVisitanteId()));
+            existing.setEquipoVisitante(visitante);
+        }
 
         if (dto.getFechaHoraInicio() != null) {
             existing.setFechaHoraInicio(dto.getFechaHoraInicio());
@@ -64,5 +100,19 @@ public class PartidoServiceImpl implements PartidoService {
         }
 
         return partidoMapper.toResponseDto(partidoRepository.save(existing));
+    }
+
+    private void validarEquiposDistintos(Long equipoLocalId, Long equipoVisitanteId) {
+        if (equipoLocalId.equals(equipoVisitanteId)) {
+            throw new BadRequestException(
+                    "El equipo local y el equipo visitante no pueden ser el mismo.");
+        }
+    }
+
+    @Override
+    public List<PartidoResponseDto> listar() {
+        return partidoRepository.findAll().stream()
+                .map(partidoMapper::toResponseDto)
+                .toList();
     }
 }

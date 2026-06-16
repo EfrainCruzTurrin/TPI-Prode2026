@@ -1,16 +1,18 @@
 package com.programacion4tpi.prode.feature.usuario.dtos.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 
 public record LoginRequestDto(
-        @NotBlank(message = "El usuario es obligatorio")
-        @Size(max = 64)
-        String username,
+        @NotBlank(message = "El email es obligatorio")
+        @Size(max = 35)
+        @Email
+        String email,
 
         @NotBlank(message = "La contraseña es obligatoria")
-        @Size(max = 128)
+        @Size(max = 20)
         String password
 ) {
 }

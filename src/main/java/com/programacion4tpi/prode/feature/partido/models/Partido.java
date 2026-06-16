@@ -1,5 +1,7 @@
 package com.programacion4tpi.prode.feature.partido.models;
 
+import com.programacion4tpi.prode.feature.equipo.models.Equipo;
+import com.programacion4tpi.prode.feature.fecha.models.Fecha;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
