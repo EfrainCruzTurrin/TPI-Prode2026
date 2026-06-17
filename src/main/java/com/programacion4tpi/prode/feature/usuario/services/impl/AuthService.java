@@ -51,30 +51,32 @@ public class AuthService implements IAuthService {
                 .build();
         userRepository.save(user);
     }
-
     @Override
     public AuthResponseDto login(LoginRequestDto request) {
-
         try {
             Authentication authentication = authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken.unauthenticated(request.email(), request.password())
             );
 
             UserDetails principal = (UserDetails) authentication.getPrincipal();
-
             assert principal != null;
-            var roles = principal.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+
+            var roles = principal.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority).toList();
 
             String accessToken = jwtService.generateToken(principal.getUsername(), roles);
             String refreshToken = jwtService.generateRefreshToken(principal.getUsername());
+
+            // Cast seguro: UserDetailsServiceImpl siempre devuelve Usuario
+            Usuario usuario = (Usuario) principal;
 
             return new AuthResponseDto(
                     accessToken,
                     refreshToken,
                     TOKEN_TYPE_BEARER,
                     jwtProperties.expirationMs(),
-                    principal.getUsername(),
-                    roles.isEmpty() ? null : roles.getFirst()
+                    usuario.getEmail(),           // ← email del usuario
+                    usuario.getRol().name()       // ← "ADMIN" o "JUGADOR" (sin prefijo ROLE_)
             );
 
         } catch (BadCredentialsException e) {

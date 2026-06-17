@@ -30,26 +30,7 @@ public class PartidoServiceImpl implements PartidoService {
     private final PartidoMapper partidoMapper;
     private final PuntuacionService puntuacionService;
 
-    @Override
-    @Transactional
-    public PartidoResponseDto create(PartidoRequestDto dto) {
-        validarEquiposDistintos(dto.getEquipoLocalId(), dto.getEquipoVisitanteId());
 
-        Fecha fecha = fechaRepository.findById(dto.getFechaId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Fecha no encontrada con id: " + dto.getFechaId()));
-
-        Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Equipo local no encontrado con id: " + dto.getEquipoLocalId()));
-
-        Equipo visitante = equipoRepository.findById(dto.getEquipoVisitanteId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Equipo visitante no encontrado con id: " + dto.getEquipoVisitanteId()));
-
-        Partido partido = partidoMapper.toEntity(dto, fecha, local, visitante);
-        return partidoMapper.toResponseDto(partidoRepository.save(partido));
-    }
 
     @Override
     @Transactional
@@ -110,6 +91,34 @@ public class PartidoServiceImpl implements PartidoService {
             throw new BadRequestException(
                     "El equipo local y el equipo visitante no pueden ser el mismo.");
         }
+    }
+
+    @Override
+    @Transactional
+    public PartidoResponseDto create(PartidoRequestDto dto) {
+        validarEquiposDistintos(dto.getEquipoLocalId(), dto.getEquipoVisitanteId());
+
+        // ← NUEVO: validar que no exista el mismo partido en la misma fecha
+        if (partidoRepository.existePartidoEnFechaEntreEquipos(
+                dto.getFechaId(), dto.getEquipoLocalId(), dto.getEquipoVisitanteId())) {
+            throw new BadRequestException(
+                    "Ya existe un partido entre estos equipos en la fecha seleccionada.");
+        }
+
+        Fecha fecha = fechaRepository.findById(dto.getFechaId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Fecha no encontrada con id: " + dto.getFechaId()));
+
+        Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Equipo local no encontrado con id: " + dto.getEquipoLocalId()));
+
+        Equipo visitante = equipoRepository.findById(dto.getEquipoVisitanteId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Equipo visitante no encontrado con id: " + dto.getEquipoVisitanteId()));
+
+        Partido partido = partidoMapper.toEntity(dto, fecha, local, visitante);
+        return partidoMapper.toResponseDto(partidoRepository.save(partido));
     }
 
     @Override

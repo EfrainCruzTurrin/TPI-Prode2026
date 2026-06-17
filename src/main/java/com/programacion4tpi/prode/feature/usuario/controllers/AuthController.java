@@ -41,4 +41,6 @@ public class AuthController {
         RefreshResponseDto body = authService.refresh(request);
         return ResponseEntity.ok(BaseResponse.ok(body, "Token renovado correctamente"));
     }
+
+
 }
