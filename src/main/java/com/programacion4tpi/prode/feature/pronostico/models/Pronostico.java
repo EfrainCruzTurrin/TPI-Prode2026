@@ -1,7 +1,5 @@
 package com.programacion4tpi.prode.feature.pronostico.models;
 
-import com.programacion4tpi.prode.feature.partido.models.Partido;
-import com.programacion4tpi.prode.feature.usuario.models.Usuario;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -22,15 +20,13 @@ public class Pronostico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // guardo ID u obj completo??
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
+    private Long usuarioId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "partido_id")
-    private Partido partido;
+    private Long partidoId;
 
     @Column(name = "goles_local_predicho", nullable = false)
     private Integer golesLocalPredicho;

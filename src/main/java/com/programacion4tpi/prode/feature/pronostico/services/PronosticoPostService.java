@@ -32,7 +32,6 @@ public class PronosticoPostService implements IPronosticoPostService {
 
     @Override
     public PronosticoResponseDto create(PronosticoRequestDto dto) {
-        // falta validar 30' antes partido
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -57,8 +56,8 @@ public class PronosticoPostService implements IPronosticoPostService {
         }
 
         Pronostico pronostico = mapper.toEntity(dto);
-        pronostico.setUsuario(usuario);
-        pronostico.setPartido(partido);
+        pronostico.setUsuarioId(usuario.getId());
+        pronostico.setPartidoId(partido.getId());
 
         Pronostico saved = repository.save(pronostico);
         return mapper.toDto(saved);
