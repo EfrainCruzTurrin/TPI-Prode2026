@@ -6,12 +6,14 @@ import com.programacion4tpi.prode.feature.equipo.models.Equipo;
 import com.programacion4tpi.prode.feature.equipo.repository.EquipoRepository;
 import com.programacion4tpi.prode.feature.fecha.models.Fecha;
 import com.programacion4tpi.prode.feature.fecha.repository.FechaRepository;
+import com.programacion4tpi.prode.feature.partido.dtos.request.CargarResultadoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoUpdateRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.response.PartidoResponseDto;
 import com.programacion4tpi.prode.feature.partido.mappers.PartidoMapper;
 import com.programacion4tpi.prode.feature.partido.models.Partido;
 import com.programacion4tpi.prode.feature.partido.repository.PartidoRepository;
+import com.programacion4tpi.prode.feature.pronostico.service.domain.PuntuacionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class PartidoServiceImpl implements PartidoService {
     private final FechaRepository fechaRepository;
     private final EquipoRepository equipoRepository;
     private final PartidoMapper partidoMapper;
+    private final PuntuacionService puntuacionService;
 
     @Override
     @Transactional
@@ -114,5 +117,38 @@ public class PartidoServiceImpl implements PartidoService {
         return partidoRepository.findAll().stream()
                 .map(partidoMapper::toResponseDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public PartidoResponseDto cargarResultado(Long id, CargarResultadoRequestDto dto) {
+        Partido partido = partidoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado con id: " + id));
+
+        // AC: el partido debe estar EN_JUEGO
+        if (partido.getEstado() != Partido.EstadoPartido.EN_JUEGO) {
+            throw new BadRequestException(
+                    "Solo se puede cargar resultado de un partido en estado EN_JUEGO. Estado actual: "
+                            + partido.getEstado());
+        }
+
+        partido.setGolesLocal(dto.getGolesLocal());
+        partido.setGolesVisitante(dto.getGolesVisitante());
+
+        // Derivar resultado automáticamente
+        Partido.ResultadoPartido resultado;
+        if (dto.getGolesLocal() > dto.getGolesVisitante())      resultado = Partido.ResultadoPartido.LOCAL;
+        else if (dto.getGolesLocal() < dto.getGolesVisitante()) resultado = Partido.ResultadoPartido.VISITANTE;
+        else                                                     resultado = Partido.ResultadoPartido.EMPATE;
+
+        partido.setResultado(resultado);
+        partido.setEstado(Partido.EstadoPartido.FINALIZADO); // AC: estado → FINALIZADO
+
+        Partido saved = partidoRepository.save(partido);
+
+        // Disparar el motor de puntuación
+        puntuacionService.calcularYAsignarPuntos(saved);
+
+        return partidoMapper.toResponseDto(saved);
     }
 }
