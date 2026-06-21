@@ -27,7 +27,6 @@ public class Partido {
     @JoinColumn(name = "equipo_visitante_id", nullable = false)
     private Equipo equipoVisitante;
 
-    // Utilizamos Instant para forzar y garantizar la persistencia en formato UTC
     @Column(name = "fecha_hora_inicio", nullable = false)
     private Instant fechaHoraInicio;
 
