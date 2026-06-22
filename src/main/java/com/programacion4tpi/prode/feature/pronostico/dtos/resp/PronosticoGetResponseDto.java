@@ -1,4 +1,16 @@
 package com.programacion4tpi.prode.feature.pronostico.dtos.resp;
 
-public record PronosticoGetResponseDto() {
-}
+import lombok.Builder;
+import java.time.LocalDateTime;
+
+@Builder
+public record PronosticoGetResponseDto(
+        Long id,
+        Long usuarioId,
+        String username,
+        Long partidoId,
+        Integer golesLocalPredicho,
+        Integer golesVisitantePredicho,
+        Integer puntosOtorgados,
+        LocalDateTime fechaCreacion
+) {}
