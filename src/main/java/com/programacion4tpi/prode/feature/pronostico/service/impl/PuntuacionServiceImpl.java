@@ -29,11 +29,11 @@ public class PuntuacionServiceImpl implements PuntuacionService {
             int puntos = calcularPuntos(
                     partido.getGolesLocal(),
                     partido.getGolesVisitante(),
-                    pronostico.getGolesLocalPronosticado(),
-                    pronostico.getGolesVisitantePronosticado(),
+                    pronostico.getGolesLocalPredicho(),
+                    pronostico.getGolesVisitantePredicho(),
                     resultadoReal
             );
-            pronostico.setPuntosObtenidos(puntos);
+            pronostico.setPuntosOtorgados(puntos);
             pronosticoRepository.save(pronostico);
 
             // Acumular en el usuario
