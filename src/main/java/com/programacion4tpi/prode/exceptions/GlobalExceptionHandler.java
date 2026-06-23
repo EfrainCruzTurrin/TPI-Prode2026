@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +27,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus())
                         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
                         .body(problem);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ProblemDetail> handleAuthorizationDenied(
+            AuthorizationDeniedException ex,
+            HttpServletRequest req) {
+
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN,
+                "No tiene permisos para realizar esta acción"
+        );
+
+        problem.setType(URI.create("/errors/forbidden"));
+        problem.setInstance(URI.create(req.getRequestURI()));
+        problem.setProperty("errors",
+                List.of("Esta acción requiere de más privilegios"));
+        problem.setProperty("timestamp", Instant.now().toString());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problem);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

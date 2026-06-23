@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/partidos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class CargarResultadoController {
 
     private final PartidoService partidoService;
 
     @PatchMapping("/{id}/resultado")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BaseResponse<PartidoResponseDto>> cargarResultado(
             @PathVariable Long id,
             @Valid @RequestBody CargarResultadoRequestDto dto) {

@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/equipos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class EquipoPostController {
 
     private final EquipoService equipoService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EquipoResponseDto> crearEquipo(
             @Valid @RequestBody EquipoRequestDto requestDto) {
         EquipoResponseDto response = equipoService.crearEquipo(requestDto);

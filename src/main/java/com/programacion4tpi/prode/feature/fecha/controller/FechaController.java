@@ -6,6 +6,7 @@ import com.programacion4tpi.prode.feature.fecha.service.domain.FechaService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class FechaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FechaResponseDto> crear(
             @RequestBody @Valid FechaRequestDto dto
     ) {
@@ -36,4 +38,6 @@ public class FechaController {
                 fechaService.listar()
         );
     }
+
+    // añadir delete para el admin
 }

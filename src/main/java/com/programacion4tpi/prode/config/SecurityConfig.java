@@ -1,6 +1,7 @@
 package com.programacion4tpi.prode.config;
 
 import com.programacion4tpi.prode.config.jwt.JwtAuthFilter;
+import com.programacion4tpi.prode.exceptions.jwt.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 
 @Configuration
@@ -24,14 +24,18 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final CorsConfigurationSource corsConfigurationSource;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                )
                 .authorizeHttpRequests(auth -> auth
 
                         // Públicos
@@ -39,12 +43,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth/refresh").permitAll()
 
-                        // Fechas: solo GET público
-                        .requestMatchers(HttpMethod.GET, "/api/fechas/**").permitAll()
-
                         // Protegidos
                         .requestMatchers("/api/equipos/**").authenticated()
                         .requestMatchers("/api/partidos/**").authenticated()
+                        .requestMatchers("/api/pronosticos/**").authenticated()
+                        .requestMatchers("/api/fechas/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

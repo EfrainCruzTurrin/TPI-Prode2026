@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/equipos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class EquipoDeleteController {
 
     private final EquipoService equipoService;
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminarEquipo(@PathVariable Long id) {
         equipoService.eliminarEquipo(id);
         return ResponseEntity.noContent().build(); // HTTP 204

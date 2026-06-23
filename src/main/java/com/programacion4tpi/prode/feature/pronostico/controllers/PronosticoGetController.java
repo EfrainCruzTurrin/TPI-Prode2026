@@ -4,6 +4,7 @@ import com.programacion4tpi.prode.feature.pronostico.dtos.resp.PronosticoRespons
 import com.programacion4tpi.prode.feature.pronostico.services.interfaces.IPronosticoGetService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/pronosticos")
 @AllArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class PronosticoGetController {
 
     private final IPronosticoGetService pronosticoGetService;

@@ -4,6 +4,7 @@ import com.programacion4tpi.prode.feature.partido.dtos.response.PartidoResponseD
 import com.programacion4tpi.prode.feature.partido.service.impl.PartidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/partidos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class GetPartidosController {
 
     private final PartidoService partidoService;

@@ -2,6 +2,8 @@ package com.programacion4tpi.prode.feature.fecha.models;
 
 import jakarta.persistence.*;
 
+// linkear partidos?
+
 @Entity
 @Table(name = "fecha_jornada")
 public class Fecha {
