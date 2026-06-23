@@ -5,9 +5,12 @@ import java.time.Instant;
 
 @Data
 public class PartidoUpdateRequestDto {
+    private Long fechaId;
+    private Long equipoLocalId;
+    private Long equipoVisitanteId;
     private Instant fechaHoraInicio;
-    private String estado; // POR_JUGARSE, EN_JUEGO, FINALIZADO
+    private String estado;
     private Integer golesLocal;
     private Integer golesVisitante;
-    private String resultado; // LOCAL, EMPATE, VISITANTE
+    private String resultado;
 }

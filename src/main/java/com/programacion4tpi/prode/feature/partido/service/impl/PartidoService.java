@@ -1,10 +1,15 @@
 package com.programacion4tpi.prode.feature.partido.service.impl;
 
+import com.programacion4tpi.prode.feature.partido.dtos.request.CargarResultadoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoUpdateRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.response.PartidoResponseDto;
 
+import java.util.List;
+
 public interface PartidoService {
     PartidoResponseDto create(PartidoRequestDto dto);
     PartidoResponseDto update(Long id, PartidoUpdateRequestDto dto);
+    List<PartidoResponseDto> listar();
+    PartidoResponseDto cargarResultado(Long id, CargarResultadoRequestDto dto);
 }

@@ -3,10 +3,7 @@ package com.programacion4tpi.prode.config.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -22,24 +19,26 @@ public class JwtService {
     private final JwtProperties properties;
     private SecretKey signingKey;
 
+    public JwtService(JwtProperties properties) {
+        this.properties = properties;
+    }
+
     @PostConstruct
-    void initSigningKey() {	// ejecución única, al levantar app
-        // comprobación de algoritmo
+    void initSigningKey() {
+
         if (!"HS256".equalsIgnoreCase(properties.algorithm())) {
             throw new IllegalStateException("Solo está soportado el algoritmo HS256 (app.jwt.algorithm)");
         }
 
-        // generación de firma a partir de secret
-        byte[] keyBytes = properties.secret().getBytes(StandardCharsets.UTF_8);	// secret como plaintext (debe venir de entorno seguro o tener entropía (aleatoriedad) alta)
+        byte[] keyBytes = properties.secret().getBytes(StandardCharsets.UTF_8);
         if (keyBytes.length < MIN_SECRET_BYTES) {
             throw new IllegalStateException(
                     "app.jwt.secret debe tener al menos " + MIN_SECRET_BYTES + " bytes en UTF-8 para HS256");
         }
 
-        signingKey = Keys.hmacShaKeyFor(keyBytes);	// convierte el secret en clave válida
+        signingKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // generación de tokens de acceso
     public String generateToken(String username, Collection<String> roles) {
         Instant now = Instant.now();
         Instant expiry = now.plusMillis(properties.expirationMs());
@@ -63,7 +62,6 @@ public class JwtService {
                 .compact();
     }
 
-    // validación de firma, expiración y estructura del token
     public Optional<Claims> parseValidClaims(String token) {
         if (token == null || token.isBlank()) {
             return Optional.empty();
@@ -72,7 +70,7 @@ public class JwtService {
         try {
             return Optional.of(
                     Jwts.parser()
-                            .verifyWith(signingKey)	// verifica firma
+                            .verifyWith(signingKey)
                             .build()
                             .parseSignedClaims(token)
                             .getPayload());
@@ -81,7 +79,7 @@ public class JwtService {
         }
     }
 
-    public Optional<String> extractUsername(String token) {
+    public Optional<String> extractEmail(String token) {
         return parseValidClaims(token).map(Claims::getSubject);
     }
 
