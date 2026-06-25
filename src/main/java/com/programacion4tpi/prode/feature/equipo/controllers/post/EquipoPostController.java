@@ -1,5 +1,6 @@
 package com.programacion4tpi.prode.feature.equipo.controllers.post;
 
+import com.programacion4tpi.prode.config.BaseResponse;
 import com.programacion4tpi.prode.feature.equipo.dtos.request.EquipoCreateRequestDto;
 import com.programacion4tpi.prode.feature.equipo.dtos.response.EquipoResponseDto;
 import com.programacion4tpi.prode.feature.equipo.services.interfaces.EquipoService;
@@ -19,9 +20,12 @@ public class EquipoPostController {
     private final EquipoService equipoService;
 
     @PostMapping
-    public ResponseEntity<EquipoResponseDto> crearEquipo(
+    public ResponseEntity<BaseResponse<EquipoResponseDto>> crearEquipo(
             @Valid @RequestBody EquipoCreateRequestDto requestDto) {
+
         EquipoResponseDto response = equipoService.crearEquipo(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                BaseResponse.ok(response, "Equipo creado correctamente"));
     }
 }
