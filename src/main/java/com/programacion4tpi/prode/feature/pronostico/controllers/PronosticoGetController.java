@@ -14,13 +14,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/pronosticos")
 @AllArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class PronosticoGetController {
 
     private final IPronosticoGetService pronosticoGetService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PronosticoResponseDto>> listarPronosticos() {
         return ResponseEntity.ok(pronosticoGetService.listarPronosticos());
     }
+
+    // listar pronósticos del usuario
 }

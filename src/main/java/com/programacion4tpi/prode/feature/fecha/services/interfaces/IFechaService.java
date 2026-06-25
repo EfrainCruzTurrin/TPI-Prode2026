@@ -7,7 +7,7 @@ import com.programacion4tpi.prode.feature.partido.models.enums.EstadoPartido;
 import java.util.List;
 
 
-public interface FechaService {
+public interface IFechaService {
 
     FechaResponseDto crear(FechaRequestDto dto);
 

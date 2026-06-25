@@ -1,8 +1,9 @@
 package com.programacion4tpi.prode.feature.fecha.controllers;
 
+import com.programacion4tpi.prode.config.BaseResponse;
 import com.programacion4tpi.prode.feature.fecha.dtos.request.FechaRequestDto;
 import com.programacion4tpi.prode.feature.fecha.dtos.response.FechaResponseDto;
-import com.programacion4tpi.prode.feature.fecha.services.interfaces.FechaService;
+import com.programacion4tpi.prode.feature.fecha.services.interfaces.IFechaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,16 +18,19 @@ import java.util.List;
 @AllArgsConstructor
 public class FechaController {
 
-    private final FechaService fechaService;
+    private final IFechaService fechaService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<FechaResponseDto> crear(
+    public ResponseEntity<BaseResponse<FechaResponseDto>> crear(
             @RequestBody @Valid FechaRequestDto dto
     ) {
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(fechaService.crear(dto));
+        FechaResponseDto fechaResponseDto = fechaService.crear(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                BaseResponse.ok(fechaResponseDto, "Fecha creada correctamente")
+        );
     }
 
     @GetMapping

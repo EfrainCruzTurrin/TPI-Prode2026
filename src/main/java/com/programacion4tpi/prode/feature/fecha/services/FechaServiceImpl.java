@@ -6,7 +6,7 @@ import com.programacion4tpi.prode.feature.fecha.dtos.response.FechaResponseDto;
 import com.programacion4tpi.prode.feature.fecha.models.enums.EstadoFecha;
 import com.programacion4tpi.prode.feature.fecha.models.Fecha;
 import com.programacion4tpi.prode.feature.fecha.repository.FechaRepository;
-import com.programacion4tpi.prode.feature.fecha.services.interfaces.FechaService;
+import com.programacion4tpi.prode.feature.fecha.services.interfaces.IFechaService;
 import com.programacion4tpi.prode.feature.partido.models.enums.EstadoPartido;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class FechaServiceImpl implements FechaService {
+public class FechaServiceImpl implements IFechaService {
 
     private final FechaRepository fechaRepository;
 

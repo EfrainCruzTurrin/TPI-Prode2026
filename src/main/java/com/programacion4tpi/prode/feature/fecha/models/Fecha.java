@@ -4,7 +4,6 @@ import com.programacion4tpi.prode.feature.fecha.models.enums.EstadoFecha;
 import jakarta.persistence.*;
 import lombok.*;
 
-// linkear partidos?
 
 @Entity
 @Table(name = "fecha")

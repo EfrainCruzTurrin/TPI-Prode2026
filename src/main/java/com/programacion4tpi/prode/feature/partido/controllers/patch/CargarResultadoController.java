@@ -1,4 +1,3 @@
-// feature/partido/controllers/patch/CargarResultadoController.java
 package com.programacion4tpi.prode.feature.partido.controllers.patch;
 
 import com.programacion4tpi.prode.config.BaseResponse;

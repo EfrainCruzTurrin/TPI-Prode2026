@@ -17,11 +17,4 @@ public class FechaRequestDto {
     @Size(max = 30, message = "El nombre de la fecha no puede tener más de 30 caracteres")
     private String nombre;
 
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
 }
