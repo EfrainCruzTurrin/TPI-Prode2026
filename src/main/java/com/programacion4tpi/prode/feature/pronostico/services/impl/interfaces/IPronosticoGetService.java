@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface IPronosticoGetService {
     List<PronosticoResponseDto> listarPronosticos();
+    List<PronosticoResponseDto> listarMisPronosticos();
 }

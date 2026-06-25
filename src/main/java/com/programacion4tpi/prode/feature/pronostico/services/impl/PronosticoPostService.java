@@ -32,18 +32,18 @@ public class PronosticoPostService implements IPronosticoPostService {
     public PronosticoResponseDto create(PronosticoCreateRequestDto dto) {
 
         Usuario usuario = validateUser.getAuthenticatedUserSession();
+
+        if (repository.existsByUsuarioIdAndPartidoId(usuario.getId(), dto.partidoId())) {
+            throw new BadRequestException("Ya existe un pronóstico para este partido");
+        }
+
         Partido partido = validatePartido.validatePartidoById(dto.partidoId());
 
         Instant ahora = Instant.now();
-
         if (!ahora.isBefore(partido.getFechaHoraInicio().minus(30, ChronoUnit.MINUTES))) {
             throw new BadRequestException(
                     "No se pueden realizar pronósticos cuando faltan menos de 30 minutos para el partido"
             );
-        }
-
-        if (repository.existsByUsuarioIdAndPartidoId(usuario.getId(), dto.partidoId())) {
-            throw new BadRequestException("Ya existe un pronóstico para este partido");
         }
 
         Pronostico pronostico = mapper.toEntity(dto);

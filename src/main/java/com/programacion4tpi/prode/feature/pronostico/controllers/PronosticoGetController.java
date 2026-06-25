@@ -18,11 +18,14 @@ public class PronosticoGetController {
 
     private final IPronosticoGetService pronosticoGetService;
 
-    @GetMapping
+    @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<PronosticoResponseDto>> listarPronosticos() {
         return ResponseEntity.ok(pronosticoGetService.listarPronosticos());
     }
 
-    // listar pronósticos del usuario
+    @GetMapping
+    public ResponseEntity<List<PronosticoResponseDto>> listarMisPronosticos() {
+        return ResponseEntity.ok(pronosticoGetService.listarMisPronosticos());
+    }
 }
