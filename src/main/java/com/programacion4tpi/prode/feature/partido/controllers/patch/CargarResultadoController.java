@@ -24,9 +24,9 @@ public class CargarResultadoController {
             @Valid @RequestBody CargarResultadoRequestDto dto) {
 
         PartidoResponseDto response = partidoService.cargarResultado(id, dto);
-        return ResponseEntity.ok(BaseResponse.<PartidoResponseDto>builder()
-                .data(response)
-                .message("Resultado cargado y puntos asignados correctamente.")
-                .build());
+
+        return ResponseEntity.ok(BaseResponse.ok(
+                response, "Resultados cargados correctamente"
+        ));
     }
 }

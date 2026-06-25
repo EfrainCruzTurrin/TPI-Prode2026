@@ -1,7 +1,6 @@
 package com.programacion4tpi.prode.feature.partido.dtos.request;
 
 import com.programacion4tpi.prode.feature.partido.models.enums.EstadoPartido;
-import com.programacion4tpi.prode.feature.partido.models.enums.ResultadoPartido;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
@@ -31,6 +30,4 @@ public class PartidoUpdateRequestDto {
 
     @PositiveOrZero(message = "La cantidad de goles debe ser mayor o igual a 0.")
     private Integer golesVisitante;
-
-    private ResultadoPartido resultado;
 }

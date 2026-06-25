@@ -1,7 +1,7 @@
 package com.programacion4tpi.prode.feature.partido.dtos.request;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 @Getter
@@ -11,10 +11,10 @@ import lombok.*;
 public class CargarResultadoRequestDto {
 
     @NotNull(message = "Los goles del equipo local son obligatorios.")
-    @Min(value = 0, message = "Los goles no pueden ser negativos.")
+    @PositiveOrZero(message = "La cantidad de goles debe ser mayor o igual a 0.")
     private Integer golesLocal;
 
     @NotNull(message = "Los goles del equipo visitante son obligatorios.")
-    @Min(value = 0, message = "Los goles no pueden ser negativos.")
+    @PositiveOrZero(message = "La cantidad de goles debe ser mayor o igual a 0.")
     private Integer golesVisitante;
 }

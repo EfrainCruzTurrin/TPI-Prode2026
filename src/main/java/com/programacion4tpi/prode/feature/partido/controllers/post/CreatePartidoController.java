@@ -1,5 +1,6 @@
 package com.programacion4tpi.prode.feature.partido.controllers.post;
 
+import com.programacion4tpi.prode.config.BaseResponse;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoCreateRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.response.PartidoResponseDto;
 import com.programacion4tpi.prode.feature.partido.services.impl.intefaces.PartidoService;
@@ -19,8 +20,13 @@ public class CreatePartidoController {
     private final PartidoService partidoService;
 
     @PostMapping
-    public ResponseEntity<PartidoResponseDto> create(@Valid @RequestBody PartidoCreateRequestDto dto) {
+    public ResponseEntity<BaseResponse<PartidoResponseDto>> create(
+            @Valid @RequestBody PartidoCreateRequestDto dto
+    ) {
         PartidoResponseDto response = partidoService.create(dto);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                BaseResponse.ok(response, "Partido creado correctamente")
+        );
     }
 }

@@ -37,14 +37,9 @@ public class PartidoServiceImpl implements PartidoService {
     @Override
     @Transactional
     public PartidoResponseDto update(Long id, PartidoUpdateRequestDto dto) {
+
         Partido existing = partidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado"));
-
-        if (dto.getFechaId() != null) {
-            Fecha fecha = fechaRepository.findById(dto.getFechaId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Fecha no encontrada"));
-            existing.setFecha(fecha);
-        }
 
         // Determinamos cuáles serían los IDs finales (nuevos o los actuales) para validar
         Long localIdFinal = dto.getEquipoLocalId() != null
@@ -53,6 +48,12 @@ public class PartidoServiceImpl implements PartidoService {
                 ? dto.getEquipoVisitanteId() : existing.getEquipoVisitante().getId();
 
         validarEquiposDistintos(localIdFinal, visitanteIdFinal);
+
+        if (dto.getFechaId() != null) {
+            Fecha fecha = fechaRepository.findById(dto.getFechaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Fecha no encontrada"));
+            existing.setFecha(fecha);
+        }
 
         if (dto.getEquipoLocalId() != null) {
             Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
@@ -70,26 +71,19 @@ public class PartidoServiceImpl implements PartidoService {
             existing.setFechaHoraInicio(dto.getFechaHoraInicio());
         }
         if (dto.getEstado() != null) {
-            existing.setEstado(EstadoPartido.valueOf(dto.getEstado()));
+            existing.setEstado(dto.getEstado());
         }
         if (dto.getGolesLocal() != null) {
             existing.setGolesLocal(dto.getGolesLocal());
+            existing.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
         }
         if (dto.getGolesVisitante() != null) {
             existing.setGolesVisitante(dto.getGolesVisitante());
-        }
-        if (dto.getResultado() != null) {
-            existing.setResultado(ResultadoPartido.valueOf(dto.getResultado()));
+            existing.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
         }
 
-        return partidoMapper.toResponseDto(partidoRepository.save(existing));
-    }
-
-    private void validarEquiposDistintos(Long equipoLocalId, Long equipoVisitanteId) {
-        if (equipoLocalId.equals(equipoVisitanteId)) {
-            throw new BadRequestException(
-                    "El equipo local y el equipo visitante no pueden ser el mismo.");
-        }
+        Partido updated = partidoRepository.save(existing);
+        return partidoMapper.toResponseDto(updated);
     }
 
     @Override
@@ -130,6 +124,7 @@ public class PartidoServiceImpl implements PartidoService {
     @Override
     @Transactional
     public PartidoResponseDto cargarResultado(Long id, CargarResultadoRequestDto dto) {
+
         Partido partido = partidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado"));
 
@@ -141,19 +136,35 @@ public class PartidoServiceImpl implements PartidoService {
 
         partido.setGolesLocal(dto.getGolesLocal());
         partido.setGolesVisitante(dto.getGolesVisitante());
-
-        // Derivar resultado automáticamente
-        ResultadoPartido resultado;
-        if (dto.getGolesLocal() > dto.getGolesVisitante()) resultado = ResultadoPartido.LOCAL;
-        else if (dto.getGolesLocal() < dto.getGolesVisitante()) resultado = ResultadoPartido.VISITANTE;
-        else resultado = ResultadoPartido.EMPATE;
-
-        partido.setResultado(resultado);
+        partido.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
         partido.setEstado(EstadoPartido.FINALIZADO); // AC: estado → FINALIZADO
 
         Partido saved = partidoRepository.save(partido);
-
         puntuacionService.calcularYAsignarPuntos(saved);
         return partidoMapper.toResponseDto(saved);
+    }
+
+    // --- Helpers ---
+
+    private ResultadoPartido determinarResultado(
+            Integer golesLocal,
+            Integer golesVisitante) {
+
+        if (golesLocal > golesVisitante) {
+            return ResultadoPartido.LOCAL;
+        }
+
+        if (golesLocal < golesVisitante) {
+            return ResultadoPartido.VISITANTE;
+        }
+
+        return ResultadoPartido.EMPATE;
+    }
+
+    private void validarEquiposDistintos(Long equipoLocalId, Long equipoVisitanteId) {
+        if (equipoLocalId.equals(equipoVisitanteId)) {
+            throw new BadRequestException(
+                    "El equipo local y el equipo visitante no pueden ser el mismo.");
+        }
     }
 }
