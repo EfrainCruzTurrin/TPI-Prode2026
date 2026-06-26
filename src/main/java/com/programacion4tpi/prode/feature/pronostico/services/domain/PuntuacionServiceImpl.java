@@ -6,6 +6,7 @@ import com.programacion4tpi.prode.feature.pronostico.models.Pronostico;
 import com.programacion4tpi.prode.feature.pronostico.repository.IPronosticoRepository;
 import com.programacion4tpi.prode.feature.pronostico.services.domain.interfaces.PuntuacionService;
 import com.programacion4tpi.prode.feature.usuario.models.Usuario;
+import com.programacion4tpi.prode.feature.usuario.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.List;
 public class PuntuacionServiceImpl implements PuntuacionService {
 
     private final IPronosticoRepository pronosticoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     @Transactional
@@ -30,7 +32,7 @@ public class PuntuacionServiceImpl implements PuntuacionService {
 
         for (Pronostico pronostico : pronosticos) {
 
-            if (pronostico.getPuntosOtorgados() != null) {
+            if (pronostico.getPuntosOtorgados() != null && pronostico.getPuntosOtorgados() > 0) {
                 continue;
             }
 
@@ -41,17 +43,15 @@ public class PuntuacionServiceImpl implements PuntuacionService {
                     pronostico.getGolesVisitantePredicho()
             );
 
-            System.out.println("Puntos: " + puntos);
-
             pronostico.setPuntosOtorgados(puntos);
 
             Usuario usuario = pronostico.getUsuario();
-            System.out.println("Usuario: " + usuario.getUsername());
             usuario.setPuntosTotales(usuario.getPuntosTotales() + puntos);
 
             if (puntos == 3) {
                 usuario.setResultadosExactos(usuario.getResultadosExactos() + 1);
             }
+            usuarioRepository.save(usuario);
         }
     }
 
