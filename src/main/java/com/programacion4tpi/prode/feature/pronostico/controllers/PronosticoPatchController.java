@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/pronosticos")
 @AllArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class PronosticoPatchController {
 
     private final IPronosticoModifyService pronosticoModifyService;

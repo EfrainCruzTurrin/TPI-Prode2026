@@ -12,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/partidos")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class GetPartidosController {
 
     private final PartidoService partidoService;

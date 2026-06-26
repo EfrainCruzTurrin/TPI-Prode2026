@@ -12,6 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/equipos")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class EquipoGetController {
 
     private final EquipoService equipoService;
@@ -22,7 +23,6 @@ public class EquipoGetController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EquipoResponseDto> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(equipoService.obtenerEquipoPorId(id));
     }
