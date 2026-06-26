@@ -6,6 +6,7 @@ import com.programacion4tpi.prode.feature.equipo.models.Equipo;
 import com.programacion4tpi.prode.feature.equipo.repository.EquipoRepository;
 import com.programacion4tpi.prode.feature.fecha.models.Fecha;
 import com.programacion4tpi.prode.feature.fecha.repository.FechaRepository;
+import com.programacion4tpi.prode.feature.fecha.services.interfaces.IFechaService;
 import com.programacion4tpi.prode.feature.partido.dtos.request.CargarResultadoRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoCreateRequestDto;
 import com.programacion4tpi.prode.feature.partido.dtos.request.PartidoUpdateRequestDto;
@@ -33,6 +34,7 @@ public class PartidoServiceImpl implements PartidoService {
     private final EquipoRepository equipoRepository;
     private final PartidoMapper partidoMapper;
     private final PuntuacionService puntuacionService;
+    private final IFechaService fechaService;
 
     @Override
     @Transactional
@@ -41,7 +43,6 @@ public class PartidoServiceImpl implements PartidoService {
         Partido existing = partidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado"));
 
-        // Determinamos cuáles serían los IDs finales (nuevos o los actuales) para validar
         Long localIdFinal = dto.getEquipoLocalId() != null
                 ? dto.getEquipoLocalId() : existing.getEquipoLocal().getId();
         Long visitanteIdFinal = dto.getEquipoVisitanteId() != null
@@ -70,19 +71,31 @@ public class PartidoServiceImpl implements PartidoService {
         if (dto.getFechaHoraInicio() != null) {
             existing.setFechaHoraInicio(dto.getFechaHoraInicio());
         }
+
         if (dto.getEstado() != null) {
             existing.setEstado(dto.getEstado());
         }
+
         if (dto.getGolesLocal() != null) {
             existing.setGolesLocal(dto.getGolesLocal());
             existing.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
         }
+
         if (dto.getGolesVisitante() != null) {
             existing.setGolesVisitante(dto.getGolesVisitante());
             existing.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
         }
 
         Partido updated = partidoRepository.save(existing);
+
+        // Actualizar estado de la fecha automáticamente
+        Fecha fechaActual = updated.getFecha();
+        List<EstadoPartido> estados = partidoRepository.findByFechaId(fechaActual.getId())
+                .stream()
+                .map(Partido::getEstado)
+                .toList();
+        fechaService.actualizarEstadoFecha(fechaActual, estados);
+
         return partidoMapper.toResponseDto(updated);
     }
 
@@ -98,16 +111,13 @@ public class PartidoServiceImpl implements PartidoService {
         }
 
         Fecha fecha = fechaRepository.findById(dto.getFechaId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Fecha no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Fecha no encontrada"));
 
         Equipo local = equipoRepository.findById(dto.getEquipoLocalId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Equipo local no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Equipo local no encontrado"));
 
         Equipo visitante = equipoRepository.findById(dto.getEquipoVisitanteId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Equipo visitante no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Equipo visitante no encontrado"));
 
         Partido partido = partidoMapper.toEntity(dto, fecha, local, visitante);
         return partidoMapper.toResponseDto(partidoRepository.save(partido));
@@ -128,7 +138,6 @@ public class PartidoServiceImpl implements PartidoService {
         Partido partido = partidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partido no encontrado"));
 
-        // AC: el partido debe estar EN_JUEGO
         if (partido.getEstado() != EstadoPartido.EN_JUEGO) {
             throw new BadRequestException(
                     "Solo se puede cargar resultado de un partido en estado EN_JUEGO");
@@ -137,27 +146,25 @@ public class PartidoServiceImpl implements PartidoService {
         partido.setGolesLocal(dto.getGolesLocal());
         partido.setGolesVisitante(dto.getGolesVisitante());
         partido.setResultado(determinarResultado(dto.getGolesLocal(), dto.getGolesVisitante()));
-        partido.setEstado(EstadoPartido.FINALIZADO); // AC: estado → FINALIZADO
+        partido.setEstado(EstadoPartido.FINALIZADO);
 
         Partido saved = partidoRepository.save(partido);
         puntuacionService.calcularYAsignarPuntos(saved);
+
+        // Actualizar estado de la fecha automáticamente
+        Fecha fechaActual = saved.getFecha();
+        List<EstadoPartido> estados = partidoRepository.findByFechaId(fechaActual.getId())
+                .stream()
+                .map(Partido::getEstado)
+                .toList();
+        fechaService.actualizarEstadoFecha(fechaActual, estados);
+
         return partidoMapper.toResponseDto(saved);
     }
 
-    // --- Helpers ---
-
-    private ResultadoPartido determinarResultado(
-            Integer golesLocal,
-            Integer golesVisitante) {
-
-        if (golesLocal > golesVisitante) {
-            return ResultadoPartido.LOCAL;
-        }
-
-        if (golesLocal < golesVisitante) {
-            return ResultadoPartido.VISITANTE;
-        }
-
+    private ResultadoPartido determinarResultado(Integer golesLocal, Integer golesVisitante) {
+        if (golesLocal > golesVisitante) return ResultadoPartido.LOCAL;
+        if (golesLocal < golesVisitante) return ResultadoPartido.VISITANTE;
         return ResultadoPartido.EMPATE;
     }
 

@@ -67,6 +67,7 @@ public class FechaServiceImpl implements IFechaService {
         }
 
         fecha.setEstado(nuevoEstado);
+        fechaRepository.save(fecha);
     }
 
     private FechaResponseDto mapToResponse(Fecha fecha) {

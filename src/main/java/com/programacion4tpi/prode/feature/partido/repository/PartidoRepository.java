@@ -5,12 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.List;
 
 @Repository
 public interface PartidoRepository extends JpaRepository<Partido, Long> {
 
-    // Verifica si ya existe un partido en la misma fecha con los mismos equipos
-    // (en cualquier combinación: local/visitante o visitante/local)
+    List<Partido> findByFechaId(Long fechaId);
+
     @Query("""
         SELECT COUNT(p) > 0 FROM Partido p
         WHERE p.fecha.id = :fechaId

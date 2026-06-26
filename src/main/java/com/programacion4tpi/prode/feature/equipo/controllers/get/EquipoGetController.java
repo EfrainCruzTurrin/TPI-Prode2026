@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/equipos")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("isAuthenticated()")
 public class EquipoGetController {
 
     private final EquipoService equipoService;
