@@ -10,7 +10,8 @@ public class PronosticoMapper {
 
     public PronosticoResponseDto toDto(Pronostico p) {
         return PronosticoResponseDto.builder()
-                .usuarioId(p.getId())
+                .id(p.getId())
+                .usuarioId(p.getUsuario().getId())
                 .partidoId(p.getPartido().getId())
                 .golesLocalPredicho(p.getGolesLocalPredicho())
                 .golesVisitantePredicho(p.getGolesVisitantePredicho())

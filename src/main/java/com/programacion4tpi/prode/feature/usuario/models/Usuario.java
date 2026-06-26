@@ -38,7 +38,6 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private int resultadosExactos = 0;
 
-    // ver de mover al repository
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.name()));

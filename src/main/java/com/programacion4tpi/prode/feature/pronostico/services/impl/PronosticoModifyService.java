@@ -51,11 +51,13 @@ public class PronosticoModifyService implements IPronosticoModifyService {
         if (dto.golesLocalPredicho() != null) {
             pronostico.setGolesLocalPredicho(dto.golesLocalPredicho());
         }
+
         if (dto.golesVisitantePredicho() != null) {
             pronostico.setGolesVisitantePredicho(dto.golesVisitantePredicho());
         }
 
         Pronostico actualizado = repository.save(pronostico);
+
         return mapper.toDto(actualizado);
     }
 }
